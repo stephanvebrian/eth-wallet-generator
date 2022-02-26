@@ -1,14 +1,22 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+// scroll bar
+import "simplebar/src/simplebar.css";
+
+import React from "react";
+import ReactDOM from "react-dom";
+import { HelmetProvider } from "react-helmet-async";
+
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
 
 ReactDOM.render(
-  <React.StrictMode>
+  // <React.StrictMode>
+  //   <App />
+  // </React.StrictMode>
+  <HelmetProvider>
     <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+  </HelmetProvider>,
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function
