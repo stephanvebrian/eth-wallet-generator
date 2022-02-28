@@ -14,7 +14,7 @@ import Iconify from "./Iconify";
 
 // ----------------------------------------------------------------------
 
-export default function WalletMoreMenu() {
+export default function WalletMoreMenu(props) {
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -41,6 +41,7 @@ export default function WalletMoreMenu() {
           <ListItemText
             primary="Delete"
             primaryTypographyProps={{ variant: "body2" }}
+            onClick={props.onDelete}
           />
         </MenuItem>
 

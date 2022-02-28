@@ -219,6 +219,12 @@ export default function WalletGenerator() {
   };
   // end of new wallet modal
 
+  const handleDeleteRow = (address) => {
+    console.log(`DELETING ${address}`);
+    const newWalletList = [...walletList].filter((val, idx) => val.Address !== address);
+    setWalletList(newWalletList);
+  }
+
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
 
@@ -400,7 +406,7 @@ export default function WalletGenerator() {
                           <TableCell align="left">TBA</TableCell>
 
                           <TableCell align="right">
-                            <WalletMoreMenu />
+                            <WalletMoreMenu onDelete={handleDeleteRow.bind(null, Address)} />
                           </TableCell>
                         </TableRow>
                       );
