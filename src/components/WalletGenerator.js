@@ -35,9 +35,8 @@ import SearchNotFound from "./SearchNotFound";
 import WalletListHead from "./WalletListHead";
 import WalletListToolbar from "./WalletListToolbar";
 import WalletMoreMenu from "./WalletMoreMenu";
+import WalletModalForm from "./WalletModalForm";
 //
-// import USERLIST from "../_mocks/user";
-const USERLIST = [];
 
 // ----------------------------------------------------------------------
 
@@ -108,6 +107,7 @@ export default function WalletGenerator() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [addWalletOpened, setAddWalletOpened] = useState(false);
 
+  const [modalType, setModalType] = useState("");
   const [modalNameInput, setModalNameInput] = useState("");
   const [modalAddressInput, setModalAddressInput] = useState("");
   const [modalPrivateKey, setModalPrivateKey] = useState("");
@@ -121,7 +121,7 @@ export default function WalletGenerator() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = USERLIST.map((n) => n.name);
+      const newSelecteds = walletList.map((n) => n.Address);
       setSelected(newSelecteds);
       return;
     }
@@ -165,22 +165,23 @@ export default function WalletGenerator() {
     const newWalletList = [
       ...walletList,
       {
-        Name: `New Wallet ${walletList.length}`,
+        Name: `New Wallet ${walletList.length + 1}`,
         Address: generatedWallet.address,
         PrivateKey: generatedWallet.privateKey,
-        MnemonicPhrase: generatedWallet.mnemonic,
+        MnemonicPhrase: generatedWallet.mnemonic.phrase,
       },
     ];
     setWalletList(newWalletList);
   };
 
   const handleAddNewWallet = (event) => {
+    setModalType("ADD_MODAL");
     setAddWalletOpened(true);
-    console.log("ADD NEW WALLET");
   };
 
   const handleAddWalletModalClose = (event) => {
     setAddWalletOpened(false);
+    setModalType("");
   };
 
   // Add new wallet modal
@@ -201,16 +202,32 @@ export default function WalletGenerator() {
   };
 
   const handleModalAddWallet = () => {
-    const newWalletList = [
-      ...walletList,
-      {
-        Name: modalNameInput,
-        Address: modalAddressInput,
-        PrivateKey: modalPrivateKey,
-        MnemonicPhrase: modalMnemonicPhrase,
-      },
-    ];
-    setWalletList(newWalletList);
+    if(modalType === 'ADD_MODAL'){
+      const newWalletList = [
+        ...walletList,
+        {
+          Name: modalNameInput,
+          Address: modalAddressInput,
+          PrivateKey: modalPrivateKey,
+          MnemonicPhrase: modalMnemonicPhrase,
+        },
+      ];
+      setWalletList(newWalletList);      
+    } else if(modalType === 'EDIT_MODAL'){
+      const filteredWallet = [...walletList].filter((val, idx) => val.Address !== modalAddressInput); 
+      const newWalletList = [
+        ...filteredWallet,
+        {
+          Name: modalNameInput,
+          Address: modalAddressInput,
+          PrivateKey: modalPrivateKey,
+          MnemonicPhrase: modalMnemonicPhrase,
+        }
+      ];
+
+      setWalletList(newWalletList);      
+    }
+
     setModalNameInput("");
     setModalAddressInput("");
     setModalPrivateKey("");
@@ -219,14 +236,40 @@ export default function WalletGenerator() {
   };
   // end of new wallet modal
 
-  const handleDeleteRow = (address) => {
-    console.log(`DELETING ${address}`);
-    const newWalletList = [...walletList].filter((val, idx) => val.Address !== address);
-    setWalletList(newWalletList);
+  const handleDetailRow = (address) => {
+    const searchWallet = [...walletList].find(
+      (val, idx) => val.Address === address
+    );
+    setModalNameInput(searchWallet.Name);
+    setModalAddressInput(searchWallet.Address);
+    setModalPrivateKey(searchWallet.PrivateKey);
+    setModalMnemonicPhrase(searchWallet.MnemonicPhrase);
+    setModalType("DETAIL_MODAL");
+    setAddWalletOpened(true);
   }
 
+  const handleEditRow = (address) => {
+    const searchWallet = [...walletList].find(
+      (val, idx) => val.Address === address
+    );
+    setModalNameInput(searchWallet.Name);
+    setModalAddressInput(searchWallet.Address);
+    setModalPrivateKey(searchWallet.PrivateKey);
+    setModalMnemonicPhrase(searchWallet.MnemonicPhrase);
+    setModalType("EDIT_MODAL");
+    setAddWalletOpened(true);
+  };
+
+  const handleDeleteRow = (address) => {
+    console.log(`DELETING ${address}`);
+    const newWalletList = [...walletList].filter(
+      (val, idx) => val.Address !== address
+    );
+    setWalletList(newWalletList);
+  };
+
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - walletList.length) : 0;
 
   const filteredWalletList = applySortFilter(
     walletList,
@@ -235,18 +278,6 @@ export default function WalletGenerator() {
   );
 
   const isWalletNotFound = filteredWalletList.length === 0;
-
-  const modalStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    // width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-  };
 
   return (
     <Page title="Ethereum Wallet Generator">
@@ -282,73 +313,27 @@ export default function WalletGenerator() {
           </Box>
         </Stack>
 
-        <Modal
-          open={addWalletOpened}
-          onClose={handleAddWalletModalClose}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box sx={modalStyle}>
-            <Typography id="modal-modal-title" variant="h6" component="h2">
-              Add new wallet
-            </Typography>
-            <Typography
-              component={"span"}
-              id="modal-modal-description"
-              sx={{ mt: 2 }}
-            >
-              <Box style={{ marginBottom: ".85rem" }}>
-                <Input
-                  onChange={handleModalName}
-                  value={modalNameInput}
-                  multiline
-                  placeholder="Name"
-                  inputProps={{ "aria-label": "description" }}
-                  style={{ minWidth: "500px" }}
-                />
-              </Box>
-              <Box style={{ marginBottom: ".85rem" }}>
-                <Input
-                  onChange={handleModalWalletAddress}
-                  value={modalAddressInput}
-                  multiline
-                  placeholder="Wallet Address"
-                  inputProps={{ "aria-label": "description" }}
-                  style={{ minWidth: "500px" }}
-                />
-              </Box>
-              <Box style={{ marginBottom: ".85rem" }}>
-                <TextField
-                  id="wallet-private-key"
-                  value={modalPrivateKey}
-                  onChange={handleModalWalletPrivateKey}
-                  placeholder="Wallet Private Key"
-                  multiline
-                  rows={2}
-                  variant="standard"
-                  style={{ minWidth: "500px" }}
-                />
-              </Box>
-              <Box style={{ marginBottom: ".85rem" }}>
-                <TextField
-                  id="wallet-mnemonic-phrase"
-                  value={modalMnemonicPhrase}
-                  onChange={handleModalMnemonicPhrase}
-                  placeholder="Wallet Mnemonic Phrase"
-                  multiline
-                  rows={4}
-                  variant="standard"
-                  style={{ minWidth: "500px" }}
-                />
-              </Box>
-              <Box style={{ textAlign: "right" }}>
-                <Button onClick={handleModalAddWallet} variant="contained">
-                  Add Wallet
-                </Button>
-              </Box>
-            </Typography>
-          </Box>
-        </Modal>
+        <WalletModalForm
+          isModalOpen={addWalletOpened}
+          modalType={modalType}
+          onClosedModal={handleAddWalletModalClose}
+          modalTitle={
+            modalType === "ADD_MODAL"
+              ? "Add Wallet"
+              : modalType === "EDIT_MODAL"
+              ? "Edit Wallet"
+              : "Detail Wallet"
+          }
+          onChangeWalletName={handleModalName}
+          valueWalletName={modalNameInput}
+          onChangeWalletAddress={handleModalWalletAddress}
+          valueWalletAddress={modalAddressInput}
+          onChangeWalletPrivateKey={handleModalWalletPrivateKey}
+          valueWalletPrivateKey={modalPrivateKey}
+          onChangeWalletMnemonicPhrase={handleModalMnemonicPhrase}
+          valueWalletMnemonicPhrase={modalMnemonicPhrase}
+          onClickSubmit={handleModalAddWallet}
+        />
 
         <Card>
           <WalletListToolbar
@@ -406,7 +391,11 @@ export default function WalletGenerator() {
                           <TableCell align="left">TBA</TableCell>
 
                           <TableCell align="right">
-                            <WalletMoreMenu onDelete={handleDeleteRow.bind(null, Address)} />
+                            <WalletMoreMenu
+                              onDetail={handleDetailRow.bind(null, Address)}
+                              onEdit={handleEditRow.bind(null, Address)}
+                              onDelete={handleDeleteRow.bind(null, Address)}
+                            />
                           </TableCell>
                         </TableRow>
                       );

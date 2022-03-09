@@ -34,20 +34,20 @@ export default function WalletMoreMenu(props) {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <MenuItem sx={{ color: "text.secondary" }}>
+        <MenuItem
+          sx={{ color: "text.secondary" }}
+        >
           <ListItemIcon>
-            <Iconify icon="eva:trash-2-outline" width={24} height={24} />
+            <Iconify icon="eva:eye-fill" width={24} height={24} />
           </ListItemIcon>
           <ListItemText
-            primary="Delete"
+            primary="Detail"
             primaryTypographyProps={{ variant: "body2" }}
-            onClick={props.onDelete}
+            onClick={props.onDetail}
           />
         </MenuItem>
 
         <MenuItem
-          // component={RouterLink}
-          // to="#"
           sx={{ color: "text.secondary" }}
         >
           <ListItemIcon>
@@ -56,6 +56,18 @@ export default function WalletMoreMenu(props) {
           <ListItemText
             primary="Edit"
             primaryTypographyProps={{ variant: "body2" }}
+            onClick={props.onEdit}
+          />
+        </MenuItem>
+
+        <MenuItem sx={{ color: "text.secondary" }}>
+          <ListItemIcon>
+            <Iconify icon="eva:trash-2-outline" width={24} height={24} />
+          </ListItemIcon>
+          <ListItemText
+            primary="Delete"
+            primaryTypographyProps={{ variant: "body2" }}
+            onClick={props.onDelete}
           />
         </MenuItem>
       </Menu>
