@@ -308,7 +308,7 @@ export default function WalletGenerator() {
               startIcon={<Iconify icon="eva:plus-fill" />}
               onClick={handleAddNewWallet}
             >
-              New Wallet
+              Import Wallet
             </Button>
           </Box>
         </Stack>
